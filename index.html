@@ -120,11 +120,11 @@
 
         //获取当前dom节点索引
         draging = this
-        nodeClone = this.cloneNode(true);
-        nodeClone.style.position = 'fixed'
-        nodeClone.style.top = startPositionY+'px'
-        nodeClone.style.opacity = '0.8'
-        questionBody.parentNode.appendChild(nodeClone)
+        // nodeClone = this.cloneNode(true);
+        // nodeClone.style.position = 'fixed'
+        // nodeClone.style.top = startPositionY+'px'
+        // nodeClone.style.opacity = '0.8'
+        // questionBody.parentNode.appendChild(nodeClone)
         // console.log(nodeClone)
     }
     //手指移动
@@ -140,13 +140,23 @@
 
         var target = null;
 
+        var moveMaxb = questionBody.offsetHeight - (eleHeight*startIndex)
         
-            var moveMaxb = questionBody.offsetHeight - (eleHeight*startIndex)
+        moveEnd = top >= moveMaxb ? moveMaxb : top
+        // if(top > 0){
+        //     var moveMaxb = questionBody.offsetHeight - (eleHeight*startIndex)
+        
+        //         moveEnd = top >= moveMaxb ? moveMaxb : top
+
+        //         nodeClone.style.top = `${moveEnd+77}px`
+        //         console.log(moveMaxb)
+        // }else if(top < 0){
+        //     // bmax = startPositionY+top < 77 ? 77 : startPositionY+top
+        //     // nodeClone.style.top=bmax+'px'
+        //     // console.log(bmax)
+        // }
+        
             
-            moveEnd = top >= moveMaxb ? moveMaxb : top
-            
-            console.log(moveEnd)
-            nodeClone.style.top = (top+77)+'px'
             
             let nextSpr = Math.floor((moveEnd+27)/eleHeight) + startIndex-1
             
@@ -192,10 +202,10 @@
         questionBody.className=removeClassName(questionBody.className,'sorting')
         this.className=removeClassName(this.className,'moving')
 
-        startY=0;
-        startPositionY=0;
-        startIndex=0;
-        questionBody.parentNode.removeChild(nodeClone);
+        // startY=0;
+        // startPositionY=0;
+        // startIndex=0;
+        // questionBody.parentNode.removeChild(nodeClone);
     }
     
     function _index(el) {
