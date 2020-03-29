@@ -25,7 +25,7 @@
                     <div class="cell-hd">
                         <span class="sort-seq">1</span>
                     </div>
-                    <div class="cell-m">选项B</div>
+                    <div class="cell-m">选项A</div>
                     <div class="cell-ft sort-handle">
                         <i class="sort-handle-line"></i>
                         <i class="sort-handle-line"></i>
@@ -38,7 +38,7 @@
                     <div class="cell-hd">
                         <span class="sort-seq">2</span>
                     </div>
-                    <div class="cell-m">选项A</div>
+                    <div class="cell-m">选项B</div>
                     <div class="cell-ft sort-handle">
                         <i class="sort-handle-line"></i>
                         <i class="sort-handle-line"></i>
@@ -80,6 +80,11 @@
     var sortRow=document.getElementsByClassName('sort-row');
     var startY=0;
     var startPositionY=0;
+    var eleHeight=sortRow[0].offsetHeight;
+    var startIndex=0;
+    // let maxMoveLocal=0;
+
+    var draging = null;
     
     for(var item of sortRow){
         item.addEventListener('touchstart', touchSatrtFunc,false)
@@ -99,7 +104,7 @@
         this.className+=' moving'
 
         var e = e || window.event;
-        // e.preventDefault(); //阻止触摸时浏览器的缩放、滚动条滚动等
+        // e.preventDefault(); //阻止触摸时浏览器的缩放、滚动条滚动等  
         //获取第一个触点
         var touch = e.touches[0]; 
         //页面触点Y坐标
@@ -107,46 +112,141 @@
         //可拖动元素距离页面顶部的距离
         startPositionY = this.offsetTop;
         //记录触点初始位置
-        startY = y - startPositionY;
+        startY = y;
 
-        console.log(this.offsetTop)
+        startIndex = Math.ceil((startPositionY-questionBody.offsetTop) / eleHeight)+1;
 
         //获取当前dom节点索引
+        draging = this
+
     }
     //手指移动
     function touchMoveFunc(e){
         var e = e || window.event;
-        // e.preventDefault(); //阻止触摸时浏览器的缩放、滚动条滚动等
+        e.preventDefault(); //阻止触摸时浏览器的缩放、滚动条滚动等
         var now = Number(e.touches[0].pageY); 
         
-        // console.log('move'+(now-startY))
-        // console.log(this)
-
-
 
         let top = now - startY;
 
-        //纵向最大可移动距离
-        // let moveMaxH = document.body.clientHeight - imgObj.offsetHeight;
+        let moveEnd;
 
-        // top = top < 0 ? 0 : top;
-        // top = top > moveMaxH ? moveMaxH : top;
+        var target = null;
 
-        console.log(top)
-        this.style.transform=`translate(0px, ${top}px)`
-        // imgObj.style.left = left + 'px';
-        // imgObj.style.top = top + 'px';
         
+            var moveMaxb = questionBody.offsetHeight - (eleHeight*startIndex)
+            
+            moveEnd = top >= moveMaxb ? moveMaxb : top
+            
+            
+            let nextSpr = Math.floor((moveEnd+27)/eleHeight) + startIndex-1
+            
+            target = sortRow[nextSpr]
 
+            if(target.children[0].children[1].innerText !== draging.children[0].children[1].innerText){
+            		//鼠标按住的元素的下一个
+            		var targetRect = target.getBoundingClientRect();
+                    
+            		//鼠标按住的元素
+                    var dragingRect = draging.getBoundingClientRect();
+                    if (target) {
+                        if (target.animated) {
+                            return;
+                        }
+                    }
+                    if (_index(draging) < _index(target)) {
+                        target.parentNode.insertBefore(draging, target.nextSibling);
+                    } else {
+                        target.parentNode.insertBefore(draging, target);
+                    }
+                    _animate(dragingRect, draging);
+                    _animate(targetRect, target);
+            }
+            
+
+
+    }
+    function childrenText(e){
+        return e.children[0].children[0].children[0].innerText;
     }
     //手指松开
     function touchEndFunc(e){
         questionBody.className=removeClassName(questionBody.className,'sorting')
         this.className=removeClassName(this.className,'moving')
-        startY=0
-        startPositionY = this.offsetTop
+
+        startY=0;
+        startPositionY=0;
+        startIndex=0;
+    }
+    
+    function _index(el) {
+        var index = 0;
+
+        if (!el || !el.parentNode) {
+            return -1;
+        }
+
+        while (el && (el = el.previousElementSibling)) {
+            index++;
+        }
+
+        return index;
+    }
+    function _animate(prevRect, target) {
+        var ms = 300;
+
+        if (ms) {
+            var currentRect = target.getBoundingClientRect();
+
+            if (prevRect.nodeType === 1) {
+                prevRect = prevRect.getBoundingClientRect();
+            }
+
+            _css(target, 'transition', 'none');
+            _css(target, 'transform', 'translate3d(' +
+                (prevRect.left - currentRect.left) + 'px,' +
+                (prevRect.top - currentRect.top) + 'px,0)'
+            );
+
+            target.offsetWidth; // 触发重绘
+            //放在timeout里面也可以
+            // setTimeout(function() {
+            //     _css(target, 'transition', 'all ' + ms + 'ms');
+            //     _css(target, 'transform', 'translate3d(0,0,0)');
+            // }, 0);
+            _css(target, 'transition', 'all ' + ms + 'ms');
+            _css(target, 'transform', 'translate3d(0,0,0)');
+
+            clearTimeout(target.animated);
+            target.animated = setTimeout(function() {
+                _css(target, 'transition', '');
+                _css(target, 'transform', '');
+                target.animated = false;
+            }, ms);
+        }
+    }
+	//给元素添加style
+    function _css(el, prop, val) {
+        var style = el && el.style;
+
+        if (style) {
+            if (val === void 0) {
+                if (document.defaultView && document.defaultView.getComputedStyle) {
+                    val = document.defaultView.getComputedStyle(el, '');
+                } else if (el.currentStyle) {
+                    val = el.currentStyle;
+                }
+
+                return prop === void 0 ? val : val[prop];
+            } else {
+                if (!(prop in style)) {
+                    prop = '-webkit-' + prop;
+                }
+
+                style[prop] = val + (typeof val === 'string' ? '' : 'px');
+            }
+        }
     }
 
-    
 </script>
 </html>

@@ -236,6 +236,7 @@ body{
   z-index: 2;
   -webkit-transition: none;
   transition: none;
+  /* opacity: 0; */
 }
 .sort-row.moving .sort-row-cont {
   -webkit-transition: 0.3s cubic-bezier(0.56, -1.14, 0.25, 1);
@@ -320,4 +321,9 @@ body{
 
 .sort.sorting .sort-row:not(.moving) .sort-handle {
   opacity: 0;
+}
+
+.sort.sorting .sort-row:not(.moving) {
+  -webkit-transition: 0.3s;
+  transition: 0.3s;
 }
