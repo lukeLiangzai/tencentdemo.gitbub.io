@@ -9,7 +9,7 @@
     <meta http-equiv="Cache-Control" content="no-siteapp">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="format-detection" content="telephone=no">
-    <title>腾讯笔试题</title>
+    <title>移动端排序</title>
     <link rel="stylesheet" href="./index.css">
 </head>
 <body>
@@ -82,6 +82,8 @@
     var startPositionY=0;
     var eleHeight=sortRow[0].offsetHeight;
     var startIndex=0;
+
+    var nodeClone;
     // let maxMoveLocal=0;
 
     var draging = null;
@@ -118,7 +120,12 @@
 
         //获取当前dom节点索引
         draging = this
-
+        nodeClone = this.cloneNode(true);
+        nodeClone.style.position = 'fixed'
+        nodeClone.style.top = startPositionY+'px'
+        nodeClone.style.opacity = '0.8'
+        questionBody.parentNode.appendChild(nodeClone)
+        // console.log(nodeClone)
     }
     //手指移动
     function touchMoveFunc(e){
@@ -138,12 +145,13 @@
             
             moveEnd = top >= moveMaxb ? moveMaxb : top
             
+            console.log(moveEnd)
+            nodeClone.style.top = (top+77)+'px'
             
             let nextSpr = Math.floor((moveEnd+27)/eleHeight) + startIndex-1
             
             target = sortRow[nextSpr]
-
-            if(target.children[0].children[1].innerText !== draging.children[0].children[1].innerText){
+            if(_index(draging) != _index(target)){
             		//鼠标按住的元素的下一个
             		var targetRect = target.getBoundingClientRect();
                     
@@ -155,9 +163,19 @@
                         }
                     }
                     if (_index(draging) < _index(target)) {
+                        
+                        childrenText(draging).innerText = _index(target)+1
+                        childrenText(target).innerText = _index(draging)+1
+
                         target.parentNode.insertBefore(draging, target.nextSibling);
                     } else {
+                        childrenText(draging).innerText = _index(target)+1
+                        childrenText(target).innerText = _index(draging)+1
+
                         target.parentNode.insertBefore(draging, target);
+
+                        // childrenText(draging).innerText = _index(draging)
+                        // childrenText(target).innerText = _index(draging)-1
                     }
                     _animate(dragingRect, draging);
                     _animate(targetRect, target);
@@ -167,7 +185,7 @@
 
     }
     function childrenText(e){
-        return e.children[0].children[0].children[0].innerText;
+        return e.children[0].children[0].children[0];
     }
     //手指松开
     function touchEndFunc(e){
@@ -177,6 +195,7 @@
         startY=0;
         startPositionY=0;
         startIndex=0;
+        questionBody.parentNode.removeChild(nodeClone);
     }
     
     function _index(el) {
