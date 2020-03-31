@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="applicable-device" content="mobile">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no">
+    <title>移动端排序</title>
+    <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+    <section class="question">
+        <div class="question-head ">
+            <div class="question-title">
+                <span class="text">移动端排序</span>
+            </div>
+        </div>
+        <div class="question-body sort sorted"><!--sorting-->
+            <div class="sort-row"><!--moving-->
+                <div class="cell sort-row-cont">
+                    <div class="cell-hd">
+                        <span class="sort-seq">1</span>
+                    </div>
+                    <div class="cell-m">选项A</div>
+                    <div class="cell-ft sort-handle">
+                        <i class="sort-handle-line"></i>
+                        <i class="sort-handle-line"></i>
+                        <i class="sort-handle-line"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="sort-row">
+                <div class="cell sort-row-cont">
+                    <div class="cell-hd">
+                        <span class="sort-seq">2</span>
+                    </div>
+                    <div class="cell-m">选项B</div>
+                    <div class="cell-ft sort-handle">
+                        <i class="sort-handle-line"></i>
+                        <i class="sort-handle-line"></i>
+                        <i class="sort-handle-line"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="sort-row">
+                <div class="cell sort-row-cont">
+                    <div class="cell-hd">
+                        <span class="sort-seq">3</span>
+                    </div>
+                    <div class="cell-m">选项C</div>
+                    <div class="cell-ft sort-handle">
+                        <i class="sort-handle-line"></i>
+                        <i class="sort-handle-line"></i>
+                        <i class="sort-handle-line"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="sort-row">
+                <div class="cell sort-row-cont">
+                    <div class="cell-hd">
+                        <span class="sort-seq">4</span>
+                    </div>
+                    <div class="cell-m">选项D</div>
+                    <div class="cell-ft sort-handle">
+                        <i class="sort-handle-line"></i>
+                        <i class="sort-handle-line"></i>
+                        <i class="sort-handle-line"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+<script>
+    var questionBody=document.getElementsByClassName('question-body')[0];
+    var sortRow=document.getElementsByClassName('sort-row');
+    var startY=0;
+    var startOffsetTop=0;
+
+    var bodyHeight=questionBody.offsetHeight;
+    var sortHeight=sortRow[0].offsetHeight;
+
+    var startIndex=0;
+
+    var stratDom=null;
+
+    var cloneDom=null;
+    
+    for(var item of sortRow){
+        item.addEventListener('touchstart', touchSatrtFunc,true)
+
+        item.addEventListener('touchmove', touchMoveFunc,false)
+
+        item.addEventListener('touchend', touchEndFunc,false)
+    }
+
+    
+    //手指按下
+    function touchSatrtFunc(e){
+
+        addClassName(questionBody,'sorting')
+        addClassName(this,'moving')
+
+        var e = e || window.event;
+        var that = this;
+        // e.preventDefault(); //阻止触摸时浏览器的缩放、滚动条滚动等  
+        //获取第一个触点
+        var touch = e.touches[0]; 
+        //页面触点Y坐标
+        var y = Number(touch.pageY); 
+        //可拖动元素距离页面顶部的距离
+        startOffsetTop = that.offsetTop;
+        //记录触点初始位置
+        startY = y;
+
+        startIndex = _index(that)
+        
+        stratDom = that
+
+        cloneDom = this.cloneNode(true);
+        cloneDom.style.position = 'fixed'
+        cloneDom.style.top = startOffsetTop+'px'
+        cloneDom.style.opacity = '1'
+        questionBody.parentNode.appendChild(cloneDom)
+
+    }
+    //手指移动
+    function touchMoveFunc(e){
+        var e = e || window.event;
+        var that = this; 
+        e.preventDefault(); //阻止触摸时浏览器的缩放、滚动条滚动等
+        var now = Number(e.touches[0].pageY); 
+
+        let top = now - startY;
+
+        let moveEnd;
+
+
+        var target = null;
+            
+            //判断方向
+        if(top>0){
+
+            var downBoundary = bodyHeight-(sortHeight*(startIndex+1));
+
+            moveEnd = top <= downBoundary ? top : downBoundary
+
+            cloneDom.style.transform = `translateY(${moveEnd}px)`
+
+
+        }else if(top<0){
+
+            var upBoundary = -(sortHeight*(startIndex+1) - sortHeight)
+
+            moveEnd = top >= upBoundary ? top : upBoundary
+
+            cloneDom.style.transform = `translateY(${moveEnd}px)`
+
+        }
+
+        let nextSpr = Math.floor((moveEnd+27)/sortHeight) + startIndex
+
+        target = sortRow[nextSpr]
+
+        if(_index(stratDom) != _index(target)){
+            //鼠标按住的元素的下一个
+            // var targetRect = target.getBoundingClientRect();
+            
+            // //鼠标按住的元素
+            // var dragingRect = stratDom.getBoundingClientRect();
+            if (target) {
+                if (target.animated) {
+                    return;
+                }
+            }
+            if (_index(stratDom) < _index(target)) {
+                
+                // childrenText(stratDom).innerText = _index(target)+1
+                // childrenText(target).innerText = _index(stratDom)+1
+
+                target.parentNode.insertBefore(stratDom, target.nextSibling);
+            } else {
+                // childrenText(stratDom).innerText = _index(target)+1
+                // childrenText(target).innerText = _index(stratDom)+1
+
+                target.parentNode.insertBefore(stratDom, target);
+
+            }
+            // _animate(dragingRect, draging);
+            // _animate(targetRect, target);
+        }
+    }
+    //手指松开
+    function touchEndFunc(e){
+
+        removeClassName(questionBody,'sorting')
+        removeClassName(this,'moving')
+
+        questionBody.parentNode.removeChild(cloneDom);
+    }
+    //获取元素在其父元素中的下标
+    function _index(el) {
+        var index = 0;
+
+        if (!el || !el.parentNode) {
+            return -1;
+        }
+
+        while (el && (el = el.previousElementSibling)) {
+            index++;
+        }
+
+        return index;
+    }
+    function removeClassName(name,str){
+        name.className=name.className.replace(' '+str,'')
+    }
+    function addClassName(name,str){
+        name.className+=' '+str
+    }
+
+</script>
+
+
+<!-- <script>
+     var questionBody=document.getElementsByClassName('question-body')[0];
+    var sortRow=document.getElementsByClassName('sort-row');
+    var startY=0;
+    var startPositionY=0;
+    var eleHeight=sortRow[0].offsetHeight;
+    var startIndex=0;
+
+    var nodeClone;
+    // let maxMoveLocal=0;
+
+    var draging = null;
+    
+    for(var item of sortRow){
+        item.addEventListener('touchstart', touchSatrtFunc,false)
+
+        item.addEventListener('touchmove', touchMoveFunc,false)
+
+        item.addEventListener('touchend', touchEndFunc,false)
+    }
+
+    //去除某一个classname
+    function removeClassName(name,str){
+        return name=name.replace(' '+str,'')
+    }
+    //手指按下
+    function touchSatrtFunc(e){
+        questionBody.className+=' sorting'
+        this.className+=' moving'
+
+        var e = e || window.event;
+        // e.preventDefault(); //阻止触摸时浏览器的缩放、滚动条滚动等  
+        //获取第一个触点
+        var touch = e.touches[0]; 
+        //页面触点Y坐标
+        var y = Number(touch.pageY); 
+        //可拖动元素距离页面顶部的距离
+        startPositionY = this.offsetTop;
+        //记录触点初始位置
+        startY = y;
+
+        startIndex = Math.ceil((startPositionY-questionBody.offsetTop) / eleHeight)+1;
+
+        //获取当前dom节点索引
+        draging = this
+        // nodeClone = this.cloneNode(true);
+        // nodeClone.style.position = 'fixed'
+        // nodeClone.style.top = startPositionY+'px'
+        // nodeClone.style.opacity = '0.8'
+        // questionBody.parentNode.appendChild(nodeClone)
+        // console.log(nodeClone)
+    }
+    //手指移动
+    function touchMoveFunc(e){
+        var e = e || window.event;
+        e.preventDefault(); //阻止触摸时浏览器的缩放、滚动条滚动等
+        var now = Number(e.touches[0].pageY); 
+        
+
+        let top = now - startY;
+
+        let moveEnd;
+
+        var target = null;
+
+        var moveMaxb = questionBody.offsetHeight - (eleHeight*startIndex)
+        
+        moveEnd = top >= moveMaxb ? moveMaxb : top
+        // if(top > 0){
+        //     var moveMaxb = questionBody.offsetHeight - (eleHeight*startIndex)
+        
+        //         moveEnd = top >= moveMaxb ? moveMaxb : top
+
+        //         nodeClone.style.top = `${moveEnd+77}px`
+        //         console.log(moveMaxb)
+        // }else if(top < 0){
+        //     // bmax = startPositionY+top < 77 ? 77 : startPositionY+top
+        //     // nodeClone.style.top=bmax+'px'
+        //     // console.log(bmax)
+        // }
+        
+            
+            
+            let nextSpr = Math.floor((moveEnd+27)/eleHeight) + startIndex-1
+            
+            target = sortRow[nextSpr]
+            if(_index(draging) != _index(target)){
+            		//鼠标按住的元素的下一个
+            		var targetRect = target.getBoundingClientRect();
+                    
+            		//鼠标按住的元素
+                    var dragingRect = draging.getBoundingClientRect();
+                    if (target) {
+                        if (target.animated) {
+                            return;
+                        }
+                    }
+                    if (_index(draging) < _index(target)) {
+                        
+                        childrenText(draging).innerText = _index(target)+1
+                        childrenText(target).innerText = _index(draging)+1
+
+                        target.parentNode.insertBefore(draging, target.nextSibling);
+                    } else {
+                        childrenText(draging).innerText = _index(target)+1
+                        childrenText(target).innerText = _index(draging)+1
+
+                        target.parentNode.insertBefore(draging, target);
+
+                        // childrenText(draging).innerText = _index(draging)
+                        // childrenText(target).innerText = _index(draging)-1
+                    }
+                    _animate(dragingRect, draging);
+                    _animate(targetRect, target);
+            }
+            
+
+
+    }
+    function childrenText(e){
+        return e.children[0].children[0].children[0];
+    }
+    //手指松开
+    function touchEndFunc(e){
+        questionBody.className=removeClassName(questionBody.className,'sorting')
+        this.className=removeClassName(this.className,'moving')
+
+        // startY=0;
+        // startPositionY=0;
+        // startIndex=0;
+        // questionBody.parentNode.removeChild(nodeClone);
+    }
+    
+    function _index(el) {
+        var index = 0;
+
+        if (!el || !el.parentNode) {
+            return -1;
+        }
+
+        while (el && (el = el.previousElementSibling)) {
+            index++;
+        }
+
+        return index;
+    }
+    function _animate(prevRect, target) {
+        var ms = 300;
+
+        if (ms) {
+            var currentRect = target.getBoundingClientRect();
+
+            if (prevRect.nodeType === 1) {
+                prevRect = prevRect.getBoundingClientRect();
+            }
+
+            _css(target, 'transition', 'none');
+            _css(target, 'transform', 'translate3d(' +
+                (prevRect.left - currentRect.left) + 'px,' +
+                (prevRect.top - currentRect.top) + 'px,0)'
+            );
+
+            target.offsetWidth; // 触发重绘
+            //放在timeout里面也可以
+            // setTimeout(function() {
+            //     _css(target, 'transition', 'all ' + ms + 'ms');
+            //     _css(target, 'transform', 'translate3d(0,0,0)');
+            // }, 0);
+            _css(target, 'transition', 'all ' + ms + 'ms');
+            _css(target, 'transform', 'translate3d(0,0,0)');
+
+            clearTimeout(target.animated);
+            target.animated = setTimeout(function() {
+                _css(target, 'transition', '');
+                _css(target, 'transform', '');
+                target.animated = false;
+            }, ms);
+        }
+    }
+	//给元素添加style
+    function _css(el, prop, val) {
+        var style = el && el.style;
+
+        if (style) {
+            if (val === void 0) {
+                if (document.defaultView && document.defaultView.getComputedStyle) {
+                    val = document.defaultView.getComputedStyle(el, '');
+                } else if (el.currentStyle) {
+                    val = el.currentStyle;
+                }
+
+                return prop === void 0 ? val : val[prop];
+            } else {
+                if (!(prop in style)) {
+                    prop = '-webkit-' + prop;
+                }
+
+                style[prop] = val + (typeof val === 'string' ? '' : 'px');
+            }
+        }
+    }
+</script> -->
+</html>
