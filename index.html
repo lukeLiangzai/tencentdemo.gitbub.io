@@ -151,6 +151,11 @@
 
             cloneDom.style.transform = `translateY(${moveEnd}px)`
 
+            let nextSpr = Math.floor((moveEnd+27)/sortHeight) + startIndex
+
+            target = sortRow[nextSpr]
+            
+            moveSort(target)
 
         }else if(top<0){
 
@@ -160,39 +165,17 @@
 
             cloneDom.style.transform = `translateY(${moveEnd}px)`
 
+            let nextSpr = Math.floor((moveEnd+27)/sortHeight) + startIndex
+
+            target = sortRow[nextSpr]
+
+            moveSort(target)
+
         }
 
-        let nextSpr = Math.floor((moveEnd+27)/sortHeight) + startIndex
+        
 
-        target = sortRow[nextSpr]
-
-        if(_index(stratDom) != _index(target)){
-            //鼠标按住的元素的下一个
-            // var targetRect = target.getBoundingClientRect();
-            
-            // //鼠标按住的元素
-            // var dragingRect = stratDom.getBoundingClientRect();
-            if (target) {
-                if (target.animated) {
-                    return;
-                }
-            }
-            if (_index(stratDom) < _index(target)) {
-                
-                // childrenText(stratDom).innerText = _index(target)+1
-                // childrenText(target).innerText = _index(stratDom)+1
-
-                target.parentNode.insertBefore(stratDom, target.nextSibling);
-            } else {
-                // childrenText(stratDom).innerText = _index(target)+1
-                // childrenText(target).innerText = _index(stratDom)+1
-
-                target.parentNode.insertBefore(stratDom, target);
-
-            }
-            // _animate(dragingRect, draging);
-            // _animate(targetRect, target);
-        }
+        
     }
     //手指松开
     function touchEndFunc(e){
@@ -201,6 +184,32 @@
         removeClassName(this,'moving')
 
         questionBody.parentNode.removeChild(cloneDom);
+    }
+    //sort排序
+    function moveSort(target){
+        if(stratDom != target){
+            //鼠标按住的元素的下一个
+            var targetRect = target.getBoundingClientRect();
+            
+            //鼠标按住的元素
+            var dragingRect = stratDom.getBoundingClientRect();
+            if (target) {
+                if (target.animated) {
+                    return;
+                }
+            }
+            if (_index(stratDom) < _index(target)) {
+
+                target.parentNode.insertBefore(stratDom, target.nextSibling);
+                
+            } else {
+
+                target.parentNode.insertBefore(stratDom, target);
+
+            }
+            _animate(dragingRect, stratDom);
+            _animate(targetRect, target);
+        }
     }
     //获取元素在其父元素中的下标
     function _index(el) {
@@ -221,6 +230,61 @@
     }
     function addClassName(name,str){
         name.className+=' '+str
+    }
+    function _animate(prevRect, target) {
+        var ms = 300;
+
+        if (ms) {
+            var currentRect = target.getBoundingClientRect();
+
+            if (prevRect.nodeType === 1) {
+                prevRect = prevRect.getBoundingClientRect();
+            }
+
+            _css(target, 'transition', 'none');
+            _css(target, 'transform', 'translate3d(' +
+                (prevRect.left - currentRect.left) + 'px,' +
+                (prevRect.top - currentRect.top) + 'px,0)'
+            );
+
+            target.offsetWidth; // 触发重绘
+            //放在timeout里面也可以
+            // setTimeout(function() {
+            //     _css(target, 'transition', 'all ' + ms + 'ms');
+            //     _css(target, 'transform', 'translate3d(0,0,0)');
+            // }, 0);
+            _css(target, 'transition', 'all ' + ms + 'ms');
+            _css(target, 'transform', 'translate3d(0,0,0)');
+
+            clearTimeout(target.animated);
+            target.animated = setTimeout(function() {
+                _css(target, 'transition', '');
+                _css(target, 'transform', '');
+                target.animated = false;
+            }, ms);
+        }
+    }
+	//给元素添加style
+    function _css(el, prop, val) {
+        var style = el && el.style;
+
+        if (style) {
+            if (val === void 0) {
+                if (document.defaultView && document.defaultView.getComputedStyle) {
+                    val = document.defaultView.getComputedStyle(el, '');
+                } else if (el.currentStyle) {
+                    val = el.currentStyle;
+                }
+
+                return prop === void 0 ? val : val[prop];
+            } else {
+                if (!(prop in style)) {
+                    prop = '-webkit-' + prop;
+                }
+
+                style[prop] = val + (typeof val === 'string' ? '' : 'px');
+            }
+        }
     }
 
 </script>
