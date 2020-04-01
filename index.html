@@ -151,11 +151,12 @@
 
             cloneDom.style.transform = `translateY(${moveEnd}px)`
 
-            let nextSpr = Math.floor((moveEnd+27)/sortHeight) + startIndex
+            let nextSpr = Math.floor((moveEnd+27)/sortHeight) + startIndex 
 
             target = sortRow[nextSpr]
             
-            moveSort(target)
+            moveSort(target,moveEnd)
+            // console.log(top,moveEnd)
 
         }else if(top<0){
 
@@ -169,7 +170,8 @@
 
             target = sortRow[nextSpr]
 
-            moveSort(target)
+            moveSort(target,moveEnd)
+            // console.log(top,moveEnd)
 
         }
 
@@ -186,30 +188,36 @@
         questionBody.parentNode.removeChild(cloneDom);
     }
     //sort排序
-    function moveSort(target){
-        if(stratDom != target){
-            //鼠标按住的元素的下一个
-            var targetRect = target.getBoundingClientRect();
-            
-            //鼠标按住的元素
-            var dragingRect = stratDom.getBoundingClientRect();
-            if (target) {
-                if (target.animated) {
-                    return;
-                }
-            }
-            if (_index(stratDom) < _index(target)) {
+    function moveSort(target,moveEnd){
 
-                target.parentNode.insertBefore(stratDom, target.nextSibling);
-                
-            } else {
+        cloneDom.children[0].children[0].children[0].innerText = _index(target)+1
 
-                target.parentNode.insertBefore(stratDom, target);
+        if(moveEnd>0){
+            // for( let i = 0 ; i<=target.prevAll().length;i++){
 
-            }
-            _animate(dragingRect, stratDom);
-            _animate(targetRect, target);
+            //     questionBody.children[i].style.transform = `translateY(-54px)`
+
+            // }
+            // console.log('----------------',_index(target))
+            // for( let i = _index(target) ; i<=target.prevAll().length;i++){
+
+                console.log(questionBody.children[_index(target)].previousElementSibling,questionBody.children[_index(target)].nextElementSibling)
+
+            // }
         }
+        if(moveEnd<0){
+            // for( let j = 0 ; j<4;j++){
+
+            //     questionBody.children[j].style.transform = ``
+
+            // }
+            // for( let i = _index(target) ; i>0 ;i--){
+
+            //     questionBody.children[i].style.transform = `translateY(-54px)`
+
+            // }
+        }
+
     }
     //获取元素在其父元素中的下标
     function _index(el) {
@@ -285,6 +293,33 @@
                 style[prop] = val + (typeof val === 'string' ? '' : 'px');
             }
         }
+    }
+    HTMLElement.prototype.prevAll = function(){
+        var _parent = this.parentElement;
+        var _child = _parent.children;
+        var arr = [];
+        for(var i = 0;i < _child.length;i++){
+            var _childI = _child[i];
+            if(_childI == this){
+                break;
+            }
+            arr.push(_childI);
+        }
+        return arr;
+    };
+ 
+    HTMLElement.prototype.nextAll = function(){
+        var _parent = this.parentElement;
+        var _child = _parent.children;
+        var arr = [];
+        for(var i = _child.length - 1;i >= 0;i--){
+            var _childI = _child[i];
+            if(_childI == this){
+                break;
+            }
+            arr.unshift(_childI);
+        }
+        return arr;
     }
 
 </script>
